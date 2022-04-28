@@ -1,5 +1,6 @@
 package com.example.interactionbeaconlocator
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.interactionbeaconlocator.databinding.ActivityMainBinding
@@ -21,6 +22,8 @@ class MainActivity : AppCompatActivity() {
 
         crud = RegistroCRUD(this)
 
+        //val registros = ArrayList<Registro>()
+
         binding.btnEscanear.setOnClickListener{
             Nombre_texto = binding.etNombre.text.toString()
             Rssi_texto = binding.etRssi.text.toString()
@@ -29,6 +32,10 @@ class MainActivity : AppCompatActivity() {
 
             crud?.newRegistro(Registro(Nombre_texto!!,Rssi_texto!!,BCN_texto!!,INT_texto!!))
 
+        }
+
+        binding.btnMostrar.setOnClickListener{
+            startActivity(Intent(this,Listado::class.java))
         }
     }
 
