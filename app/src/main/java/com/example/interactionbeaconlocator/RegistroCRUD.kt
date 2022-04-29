@@ -22,7 +22,7 @@ class RegistroCRUD(context:Context) {
         values.put(RegistroContract.Companion.Entrada.COLUMNA_NOMBRE,item.Nombre)
         values.put(RegistroContract.Companion.Entrada.COLUMNA_RSSI,item.Rssi)
         values.put(RegistroContract.Companion.Entrada.COLUMNA_BCN,item.Bcn)
-        values.put(RegistroContract.Companion.Entrada.COLUMNA_INTEGRANTE,item.Integrante)
+        values.put(RegistroContract.Companion.Entrada.COLUMNA_INTEGRANTE,item.Rol)
 
         //Insertar una nueva fila en la tabla.
         val newRowNombre=db.insert(RegistroContract.Companion.Entrada.NOMBRE_TABLA,null,values)//Ingreso de registro.
@@ -31,7 +31,7 @@ class RegistroCRUD(context:Context) {
     }
 
     fun getRegistros():ArrayList<Registro>{
-        val items:ArrayList<Registro> = ArrayList()
+        var items:ArrayList<Registro> = ArrayList()
         //Arbrir la base de datos en modo consulta.
         val db:SQLiteDatabase=helper?.readableDatabase!!
         //Especificar las columnas ques es quieren consultar.
@@ -49,16 +49,20 @@ class RegistroCRUD(context:Context) {
         )
         //Realizar el recorrido del cursor pór la tabla.
         while (c.moveToNext()){
-            items.add(
-                Registro(
+            items.add(Registro(
                 c.getString(c.getColumnIndexOrThrow(RegistroContract.Companion.Entrada.COLUMNA_NOMBRE)),
-                    c.getString(c.getColumnIndexOrThrow(RegistroContract.Companion.Entrada.COLUMNA_RSSI)),
-                    c.getString(c.getColumnIndexOrThrow(RegistroContract.Companion.Entrada.COLUMNA_BCN)),
-                    c.getString(c.getColumnIndexOrThrow(RegistroContract.Companion.Entrada.COLUMNA_INTEGRANTE))
+                c.getString(c.getColumnIndexOrThrow(RegistroContract.Companion.Entrada.COLUMNA_RSSI)),
+                c.getString(c.getColumnIndexOrThrow(RegistroContract.Companion.Entrada.COLUMNA_BCN)),
+                c.getString(c.getColumnIndexOrThrow(RegistroContract.Companion.Entrada.COLUMNA_INTEGRANTE))
             ))
         }
         //Cerrar la base de datos.
         db.close()
         return items
+    }
+
+    fun clearList(){
+        val db:SQLiteDatabase=helper?.writableDatabase!!
+        db.delete(RegistroContract.Companion.Entrada.NOMBRE_TABLA,null,null)
     }
 }

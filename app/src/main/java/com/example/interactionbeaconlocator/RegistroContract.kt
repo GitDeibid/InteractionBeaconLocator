@@ -12,7 +12,7 @@ class RegistroContract {
                 val COLUMNA_NOMBRE = "nombre"
                 val COLUMNA_RSSI = "rssi"
                 val COLUMNA_BCN = "bcn"
-                val COLUMNA_INTEGRANTE = "integrante"
+                val COLUMNA_INTEGRANTE = "rol"
             }
         }
     }

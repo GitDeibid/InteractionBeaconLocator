@@ -8,12 +8,12 @@ class DataBaseHelper(context: Context):SQLiteOpenHelper(context,RegistroContract
 
     companion object{
         val CREATE_TABLA_REGISTRO = "CREATE TABLE "+ RegistroContract.Companion.Entrada.NOMBRE_TABLA +
-                " ("+RegistroContract.Companion.Entrada.COLUMNA_NOMBRE+" TEXT, "+
+                " (" + RegistroContract.Companion.Entrada.COLUMNA_NOMBRE+" TEXT, "+
                 RegistroContract.Companion.Entrada.COLUMNA_RSSI +" TEXT, "+
                 RegistroContract.Companion.Entrada.COLUMNA_BCN +" TEXT, "+
                 RegistroContract.Companion.Entrada.COLUMNA_INTEGRANTE + " TEXT)"
 
-        val REMOVE_REGISTRO_TABLA = "DROP TABLE IF EXIST "+ RegistroContract.Companion.Entrada.NOMBRE_TABLA
+        val REMOVE_TABLA_REGISTRO = "DROP TABLE IF EXIST "+ RegistroContract.Companion.Entrada.NOMBRE_TABLA
     }
     //Se debe configurar la funcion onCreate y onUpgrade para construir la base de datos con las estructura adecuada.
     override fun onCreate(db: SQLiteDatabase?) {
@@ -21,7 +21,9 @@ class DataBaseHelper(context: Context):SQLiteOpenHelper(context,RegistroContract
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, p1: Int, p2: Int) {
-        db?.execSQL(REMOVE_REGISTRO_TABLA)
+        db?.execSQL(REMOVE_TABLA_REGISTRO)
         onCreate(db)
     }
+
+
 }

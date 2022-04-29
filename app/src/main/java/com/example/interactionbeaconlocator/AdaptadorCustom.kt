@@ -7,13 +7,14 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class AdaptadorCustom(var contexto: Context, items:ArrayList<Registro>):RecyclerView.Adapter<AdaptadorCustom.ViewHolder>() {
+class AdaptadorCustom(items:ArrayList<Registro>):RecyclerView.Adapter<AdaptadorCustom.ViewHolder>() {
     var items:ArrayList<Registro>?=null
+    //var viewHolder:ViewHolder?=null
     init {
         this.items=items
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AdaptadorCustom.ViewHolder {
-        val vista = LayoutInflater.from(contexto).inflate(R.layout.template_registro,parent,false)
+        val vista = LayoutInflater.from(parent.context).inflate(R.layout.template_registro,parent,false)
         val viewHolder=ViewHolder(vista)//Reenderiza la vista.
         return viewHolder
     }
@@ -23,7 +24,7 @@ class AdaptadorCustom(var contexto: Context, items:ArrayList<Registro>):Recycler
         holder.info?.text="Nombre: "+item?.Nombre+"\n"+
                 "Rssi: "+item?.Rssi+
                 "\n"+"Beacon: "+item?.Bcn+
-                "\n"+"ROL: "+item?.Integrante+"\n"
+                "\n"+"ROL: "+item?.Rol
     }
 
     override fun getItemCount(): Int {

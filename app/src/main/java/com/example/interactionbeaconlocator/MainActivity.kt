@@ -28,14 +28,24 @@ class MainActivity : AppCompatActivity() {
             Nombre_texto = binding.etNombre.text.toString()
             Rssi_texto = binding.etRssi.text.toString()
             BCN_texto = binding.etBeacon.text.toString()
-            INT_texto = binding.etIntegrante.toString()
+            INT_texto = binding.etRol.text.toString()
 
             crud?.newRegistro(Registro(Nombre_texto!!,Rssi_texto!!,BCN_texto!!,INT_texto!!))
 
+            binding.etNombre.setText("")
+            binding.etRssi.setText("")
+            binding.etBeacon.setText("")
+            binding.etRol.setText("")
+
+            startActivity(Intent(this,Listado::class.java))
         }
 
         binding.btnMostrar.setOnClickListener{
             startActivity(Intent(this,Listado::class.java))
+        }
+
+        binding.btnLimpiar.setOnClickListener{
+            crud?.clearList()
         }
     }
 
