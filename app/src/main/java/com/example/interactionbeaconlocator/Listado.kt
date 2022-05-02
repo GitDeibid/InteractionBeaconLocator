@@ -24,7 +24,7 @@ class Listado : AppCompatActivity() {
         setContentView(binding_list.root)
         //Configuración de la lista que contendrá los datos leidos desde la base de datos.
         lista = binding_list.lista
-        lista?.setHasFixedSize(true)
+        //lista?.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(this)
         lista?.layoutManager=layoutManager
 
