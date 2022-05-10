@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">InteractionBeaconLocator</string>
+    <string-array name="scrum_rols">
+        <item>Scrum Master</item>
+        <item>Scrum Team 1</item>
+        <item>Scrum Team 2</item>
+        <item>Scrum Team 3</item>
+        <item>Product Owner</item>
+    </string-array>
 </resources>

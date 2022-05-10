@@ -1,25 +1,23 @@
 package com.example.interactionbeaconlocator
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import androidx.annotation.RequiresApi
+import android.widget.ArrayAdapter
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.interactionbeaconlocator.databinding.ActivityMainBinding
-import kotlin.math.log
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding:ActivityMainBinding
@@ -31,11 +29,10 @@ class MainActivity : AppCompatActivity() {
 
     private var bluetoothLeScanner:BluetoothLeScanner?= null
     //private val escaner = adaptador.bluetoothLeScanner
-    private val REQUEST_ENABLE_BT:Int=1
     private var scanning = false
     private val handler = Handler()
-    private val SCAN_PERIOD: Long = 10000
-
+    private val SCAN_PERIOD:Long = 10000
+    var ROL:String = "Anónimo"
     private val leScanCallback = object : ScanCallback() {
 
         @SuppressLint("MissingPermission")
@@ -46,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             var adress = result?.device?.address.toString()
             var nombre = result?.device?.name.toString()
             if (adress=="60:77:71:8E:69:B9" || adress == "60:77:71:8E:72:85"){
-                crud?.newRegistro(Registro(nombre,rssi,adress,"Prueba"))
+                crud?.newRegistro(Registro(nombre,rssi,adress,ROL))
                 Log.d("ESCANER","onScanResult: ${result?.device?.name}")
             }
         }
@@ -72,19 +69,27 @@ class MainActivity : AppCompatActivity() {
         revisarPermisos()
         //Boton Escanear.
         //Configuración BLE
-        bluetoothLeScanner = adaptador!!.bluetoothLeScanner
+        bluetoothLeScanner = adaptador.bluetoothLeScanner
         crud = RegistroCRUD(this)
 
-        //val registros = ArrayList<Registro>()
+        //Drop down menú de roles scrum de la  vista principal.
+        val roles = resources.getStringArray(R.array.scrum_rols)
+        val rol_adapter = ArrayAdapter(this,R.layout.rols_items,roles)
+        binding.DDRoles.setAdapter(rol_adapter)
+
 
         binding.btnEscanear.setOnClickListener{
+            //Barra de progreso de avance de escanner.
+            binding.progressBar.max=10000
+            //val currentProgress = 6000
+            ObjectAnimator.ofInt(binding.progressBar,"progress",10000).setDuration(SCAN_PERIOD).start()
 
-            if (adaptador!!.isEnabled){
+            if (adaptador.isEnabled){
+                ROL = binding.DDRoles.text.toString()
                 //Se debe escanear en bsuca de los dispositivos.
                 escanearBLE()
             }
             //crud?.newRegistro(Registro(Nombre_texto!!,Rssi_texto!!,BCN_texto!!,INT_texto!!))
-
             //startActivity(Intent(this,Listado::class.java))
         }
 
