@@ -11,11 +11,15 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.interactionbeaconlocator.databinding.ActivityMainBinding
@@ -38,21 +42,24 @@ class MainActivity : AppCompatActivity() {
     var rssi:String?=null
     var adress:String?=null
     var nombre:String?=null
+    private lateinit var permissionLauncher:ActivityResultLauncher<Array<String>>
+    private var locationPGranted = false
+    private var storePGranted = false
+    private var writePGranted = false
 
     private val leScanCallback = object : ScanCallback() {
 
-        @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             super.onScanResult(callbackType, result)
-
-            rssi=result?.rssi.toString()
+            rssi = result?.rssi.toString()
             adress = result?.device?.address.toString()
             nombre = result?.device?.name.toString()
-            //if (adress=="60:77:71:8E:69:B9" || adress == "60:77:71:8E:72:85")
-            if (result?.device!=null){
-                crud?.newRegistro(Registro(nombre!!,rssi!!,adress!!,ROL!!))
-                Log.d("ESCANER","Dispositivo: ${result?.device?.name}")
+            if (nombre!="null"){
+            //if (adress=="60:77:71:8E:69:B9" || adress == "60:77:71:8E:72:85") {
+                crud?.newRegistro(Registro(nombre!!, rssi!!, adress!!, ROL!!))
+                Log.d("ESCANER", "Dispositivo: ${result?.device?.name}")
             }
+
 
         }
     }
@@ -63,9 +70,16 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         //Solicitar los permisos necesarios para escaner bluetooth y exportar el archivo con los datos.
-        revisarPermisos()
+        permissionLauncher=registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
+            permisos->
+            locationPGranted = permisos[Manifest.permission.ACCESS_FINE_LOCATION]?:locationPGranted
+            storePGranted = permisos[Manifest.permission.READ_EXTERNAL_STORAGE]?:storePGranted
+            writePGranted = permisos[Manifest.permission.WRITE_EXTERNAL_STORAGE]?:writePGranted
+        }
+        requestPermision()
         //Boton Escanear.
         //Configuración BLE
+
         bluetoothLeScanner = adaptador.bluetoothLeScanner
         crud = RegistroCRUD(this)
 
@@ -83,6 +97,7 @@ class MainActivity : AppCompatActivity() {
         barraCarga.max=9000
         //Tiempo de escanner.
         var tiempo = binding.DDTime.text.toString()
+
         //Boton de escanear.
         binding.btnEscanear.setOnClickListener{
             if (adaptador.isEnabled){
@@ -108,40 +123,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun revisarPermisos() {
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH)!=PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH_SCAN)!= PackageManager.PERMISSION_GRANTED
-                ){
-            //El permiso no ha sido aceptado por eel momento.
-            solicitarPermiso()
-        }
-    }
-
-    private fun solicitarPermiso() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN,Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE
-            ),777)
-    }
-
-    @SuppressLint("MissingPermission")
     private fun escanearBLE(){
-        /*if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH_SCAN)
-            Log.d("ESCANER","Permiso de scanner no entregado...")
-        }*/
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             handler.postDelayed({
                 scanning = false
+
                 bluetoothLeScanner!!.stopScan(leScanCallback)
                 Log.d("ESCANER","Deteniendo el escaneo")
             }, SCAN_PERIOD)
@@ -154,6 +140,24 @@ class MainActivity : AppCompatActivity() {
             Log.d("ESCANER","Deteniendo el escaneo")
         }
     }
+    val permissionRequest:MutableList<String> = ArrayList()
+    private fun requestPermision(){
+        locationPGranted = ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
+        storePGranted = ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED
+        writePGranted = ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED
+        if (!locationPGranted){
+            permissionRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        if(!storePGranted){
+            permissionRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        if(!writePGranted){
+            permissionRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
 
+        if (permissionRequest.isNotEmpty()){
+            permissionLauncher.launch(permissionRequest.toTypedArray())
+        }
+    }
 }
 
